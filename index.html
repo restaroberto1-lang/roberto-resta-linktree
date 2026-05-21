@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Roberto Resta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #04040a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 56px 24px 72px;
+            overflow-x: hidden;
+        }
+
+        /* Background canvas */
+        #bg {
+            position: fixed;
+            inset: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Page wrapper */
+        .page {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 390px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ── Avatar ── */
+        .avatar {
+            width: 96px; height: 96px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(140,140,180,0.5) 50%, rgba(255,255,255,0.7) 100%);
+            box-shadow: 0 8px 48px rgba(0,0,0,0.8), 0 0 72px rgba(120,80,255,0.2);
+            animation: fadeUp .8s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        .avatar img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 12%;
+            display: block;
+        }
+
+        /* ── Bio hierarchy ── */
+        .bio {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-align: center;
+            padding-bottom: 8px;
+            animation: fadeUp .8s .08s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        /* 1 — Name: primary identity */
+        .bio-name {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        /* 2 — Role: what he does */
+        .bio-role {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: -0.1px;
+            color: rgba(255,255,255,0.72);
+        }
+
+        /* 3 — Tagline: value proposition */
+        .bio-tagline {
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: -0.1px;
+            color: rgba(255,255,255,0.48);
+            line-height: 1.55;
+            max-width: 270px;
+        }
+
+        /* 4 — Brands & handle: context, most subtle */
+        .bio-brands {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            color: rgba(255,255,255,0.28);
+            margin-top: 2px;
+        }
+
+        /* ── Liquid Glass buttons ── */
+        .links {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeUp .8s .16s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 56px;
+            padding: 0 22px;
+            border-radius: 18px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255,255,255,0.09);
+            border: 1px solid rgba(255,255,255,0.16);
+            backdrop-filter: blur(32px) saturate(200%) brightness(1.1);
+            -webkit-backdrop-filter: blur(32px) saturate(200%) brightness(1.1);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.12);
+            transition: transform .2s cubic-bezier(.34,1.56,.64,1), background .2s ease, box-shadow .2s ease;
+        }
+
+        /* Top gloss highlight */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 48%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+            border-radius: 18px 18px 0 0;
+            pointer-events: none;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px) scale(1.012);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.28);
+        }
+
+        .btn:active { transform: scale(.97); }
+
+        .btn-icon {
+            font-size: 17px;
+            margin-right: 13px;
+            flex-shrink: 0;
+            position: relative; z-index: 1;
+        }
+
+        .btn-label {
+            flex: 1;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+            color: #ffffff;
+            position: relative; z-index: 1;
+        }
+
+        .btn-arrow {
+            font-size: 16px;
+            color: rgba(255,255,255,0.3);
+            position: relative; z-index: 1;
+            margin-left: 6px;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            margin-top: 14px;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.14);
+            animation: fadeUp .8s .24s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        /* ── Share button ── */
+        .btn-share {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: rgba(255,255,255,0.5);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background .2s ease, color .2s ease, transform .2s cubic-bezier(.34,1.56,.64,1);
+            animation: fadeUp .8s .28s cubic-bezier(.16,1,.3,1) both;
+        }
+
+        .btn-share:hover {
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.8);
+            transform: scale(1.04);
+        }
+
+        .btn-share:active { transform: scale(.96); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="page">
+
+    <div class="avatar">
+        <img src="./[R] Immagine Profilo Aziendale Roberto.jpeg" alt="Roberto Resta">
+    </div>
+
+    <div class="bio">
+        <h1 class="bio-name">Roberto Resta</h1>
+        <p class="bio-role">Founder &amp; Marketing Manager</p>
+        <p class="bio-brands">@mxaccelerator &nbsp;·&nbsp; @surfweek &nbsp;·&nbsp; @mood_one</p>
+    </div>
+
+    <div class="links">
+        <a href="https://mxaccelerator.com/" target="_blank" rel="noopener" class="btn">
+            <span class="btn-icon">🚀</span>
+            <span class="btn-label">MX Accelerator</span>
+            <span class="btn-arrow">›</span>
+        </a>
+        <a href="https://www.youtube.com/watch?v=DQHbgNh3a8A&t=6s" target="_blank" rel="noopener" class="btn">
+            <span class="btn-icon">🎥</span>
+            <span class="btn-label">Video Intervista su YouTube</span>
+            <span class="btn-arrow">›</span>
+        </a>
+        <a href="https://mxaccelerator.com/casi-studio/" target="_blank" rel="noopener" class="btn">
+            <span class="btn-icon">📊</span>
+            <span class="btn-label">Casi Studio</span>
+            <span class="btn-arrow">›</span>
+        </a>
+        <a href="https://www.linkedin.com/in/roberto-resta-b828ba194/" target="_blank" rel="noopener" class="btn">
+            <span class="btn-icon">💼</span>
+            <span class="btn-label">Colleghiamoci su LinkedIn</span>
+            <span class="btn-arrow">›</span>
+        </a>
+    </div>
+
+    <button class="btn-share" onclick="share()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+        Condividi
+    </button>
+
+    <p class="footer">Roberto Resta · 2026</p>
+
+</div>
+
+<script>
+(function () {
+    const canvas = document.getElementById('bg');
+    const ctx    = canvas.getContext('2d');
+    let W, H;
+
+    /* Aurora orbs — large soft color blobs that drift slowly */
+    const orbs = [
+        { ox: 0.15, oy: 0.25, r: 0.58, rgb: [108, 40, 230], sx: 0.000042, sy: 0.000031, ph: 0.00 },
+        { ox: 0.82, oy: 0.18, r: 0.54, rgb: [20,  90, 220], sx:-0.000035, sy: 0.000048, ph: 1.20 },
+        { ox: 0.55, oy: 0.72, r: 0.60, rgb: [0,  160, 200], sx: 0.000038, sy:-0.000028, ph: 2.50 },
+        { ox: 0.08, oy: 0.75, r: 0.46, rgb: [190, 40, 140], sx: 0.000030, sy:-0.000045, ph: 3.80 },
+        { ox: 0.88, oy: 0.65, r: 0.48, rgb: [60,  40, 200], sx:-0.000050, sy:-0.000030, ph: 0.90 },
+        { ox: 0.45, oy: 0.10, r: 0.44, rgb: [140, 20, 200], sx: 0.000025, sy: 0.000055, ph: 4.20 },
+    ];
+
+    function drawOrbs(t) {
+        ctx.globalCompositeOperation = 'lighter';
+        orbs.forEach(({ ox, oy, r, rgb, sx, sy, ph }) => {
+            const cx = (ox + Math.sin(t * sx + ph) * 0.22) * W;
+            const cy = (oy + Math.cos(t * sy + ph) * 0.18) * H;
+            const radius = r * Math.max(W, H);
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+            grad.addColorStop(0,   `rgba(${rgb},0.62)`);
+            grad.addColorStop(0.4, `rgba(${rgb},0.26)`);
+            grad.addColorStop(1,   `rgba(${rgb},0)`);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+        });
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    /* Flow-field streamlines — organic flowing lines */
+    function fieldAngle(x, y, t) {
+        return (
+            Math.sin(x * 0.0026 + t * 0.000018) *
+            Math.cos(y * 0.0026 - t * 0.000013) * Math.PI * 1.7
+          + Math.sin((x * 0.65 + y * 0.80) * 0.0044 + t * 0.000010) * Math.PI * 0.9
+          + Math.cos((x * 0.40 - y * 0.55) * 0.0011 + t * 0.000007) * Math.PI * 0.4
+        );
+    }
+
+    const STREAM_COUNT = 700;
+    const STREAM_SPEED = 0.38;
+    const streams = [];
+
+    function newStream() {
+        return {
+            x:      Math.random() * W,
+            y:      Math.random() * H,
+            age:    Math.floor(Math.random() * 100),
+            maxAge: 100 + Math.floor(Math.random() * 80),
+            alpha:  0.18 + Math.random() * 0.28,
+            width:  0.5  + Math.random() * 0.7,
+        };
+    }
+
+    /* Separate canvas accumulates trails so they dissolve naturally */
+    const trail = document.createElement('canvas');
+    const tCtx  = trail.getContext('2d');
+
+    function resize() {
+        W = canvas.width = trail.width  = window.innerWidth;
+        H = canvas.height = trail.height = window.innerHeight;
+        streams.length = 0;
+        for (let i = 0; i < STREAM_COUNT; i++) streams.push(newStream());
+    }
+
+    function frame(t) {
+        ctx.fillStyle = '#04040a';
+        ctx.fillRect(0, 0, W, H);
+
+        drawOrbs(t);
+
+        /* Dissolve old trails */
+        tCtx.fillStyle = 'rgba(4,4,10,0.10)';
+        tCtx.fillRect(0, 0, W, H);
+
+        /* Advance each streamline and paint its segment */
+        streams.forEach((p, i) => {
+            const a  = fieldAngle(p.x, p.y, t);
+            const nx = p.x + Math.cos(a) * STREAM_SPEED;
+            const ny = p.y + Math.sin(a) * STREAM_SPEED;
+
+            tCtx.beginPath();
+            tCtx.moveTo(p.x, p.y);
+            tCtx.lineTo(nx, ny);
+            tCtx.lineWidth   = p.width;
+            tCtx.strokeStyle = `rgba(230,235,255,${p.alpha})`;
+            tCtx.stroke();
+
+            p.x = nx; p.y = ny; p.age++;
+
+            const offscreen = p.x < -2 || p.x > W + 2 || p.y < -2 || p.y > H + 2;
+            if (offscreen || p.age >= p.maxAge) streams[i] = newStream();
+        });
+
+        ctx.drawImage(trail, 0, 0);
+        requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(frame);
+})();
+
+function share() {
+    const url  = window.location.href.startsWith('file') ? 'https://robertoresta.com' : window.location.href;
+    const data = { title: 'Roberto Resta', text: 'Founder & Marketing Manager — MX Accelerator', url };
+
+    function copyFallback() {
+        navigator.clipboard.writeText(url).then(() => {
+            const btn  = document.querySelector('.btn-share');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Link copiato!';
+            setTimeout(() => { btn.innerHTML = orig; }, 2200);
+        });
+    }
+
+    if (navigator.share) {
+        navigator.share(data).catch(() => copyFallback());
+    } else {
+        copyFallback();
+    }
+}
+</script>
+
+</body>
+</html>
