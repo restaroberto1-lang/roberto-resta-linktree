@@ -295,19 +295,17 @@
     ];
 
     function drawOrbs(t) {
-        ctx.globalCompositeOperation = 'lighter';
         orbs.forEach(({ ox, oy, r, rgb, sx, sy, ph }) => {
             const cx = (ox + Math.sin(t * sx + ph) * 0.22) * W;
             const cy = (oy + Math.cos(t * sy + ph) * 0.18) * H;
             const radius = r * Math.max(W, H);
             const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-            grad.addColorStop(0,   `rgba(${rgb},0.62)`);
-            grad.addColorStop(0.4, `rgba(${rgb},0.26)`);
+            grad.addColorStop(0,   `rgba(${rgb},0.28)`);
+            grad.addColorStop(0.5, `rgba(${rgb},0.10)`);
             grad.addColorStop(1,   `rgba(${rgb},0)`);
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, W, H);
         });
-        ctx.globalCompositeOperation = 'source-over';
     }
 
     /* Flow-field streamlines — organic flowing lines */
@@ -342,6 +340,9 @@
     function resize() {
         W = canvas.width = trail.width  = window.innerWidth;
         H = canvas.height = trail.height = window.innerHeight;
+        /* Pre-fill trail with background so first frame has no flash */
+        tCtx.fillStyle = '#04040a';
+        tCtx.fillRect(0, 0, W, H);
         streams.length = 0;
         for (let i = 0; i < STREAM_COUNT; i++) streams.push(newStream());
     }
